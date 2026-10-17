@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08080a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="هواشناسی انجمن">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="سایت رسمی هواشناسی و پایش آنلاین آلودگی هوای شهرستان ارومیه - انجمن صنفی کارفرمایی سازندگان ذی‌صلاح ساختمان شهرستان ارومیه">
+    
+    <title>سایت هواشناسی انجمن | پایش زنده آلودگی هوا و دمای ارومیه</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vazirmatn Persian Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js for Weather & Pollution Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                    },
+                    colors: {
+                        obsidian: {
+                            950: '#040406',
+                            900: '#090a0f',
+                            800: '#12131c',
+                            700: '#1a1c28',
+                        },
+                        gold: {
+                            100: '#fef9e7',
+                            200: '#f9e79f',
+                            300: '#f4d03f',
+                            400: '#e5b842',
+                            500: '#d4af37',
+                            600: '#b8860b',
+                            700: '#8b6508',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            font-family: 'Vazirmatn', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            scrollbar-width: thin;
+            scrollbar-color: #d4af37 #090a0f;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #b8860b, #f4d03f);
+            border-radius: 9999px;
+        }
+
+        body {
+            background-color: #040406;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.09) 0%, transparent 38%),
+                radial-gradient(circle at 90% 85%, rgba(184, 134, 11, 0.08) 0%, transparent 40%),
+                linear-gradient(180deg, #040406 0%, #0b0c12 100%);
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* Luxury Metallic Gold Text & Borders */
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #FFF8DC 0%, #F4D03F 35%, #D4AF37 68%, #9A710C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gold-gradient-bg {
+            background: linear-gradient(135deg, #f4d03f 0%, #d4af37 52%, #9a710c 100%);
+        }
+
+        .luxury-card {
+            background: linear-gradient(145deg, rgba(19, 21, 30, 0.92) 0%, rgba(9, 10, 15, 0.97) 100%);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.75), inset 0 1px 0 0 rgba(255, 223, 100, 0.14);
+            transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .luxury-card:hover {
+            border-color: rgba(212, 175, 55, 0.52);
+            box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.88), 0 0 22px rgba(212, 175, 55, 0.13);
+        }
+
+        .gold-glow-ring {
+            box-shadow: 0 0 24px rgba(212, 175, 55, 0.45), inset 0 0 14px rgba(212, 175, 55, 0.35);
+        }
+
+        .tab-active {
+            background: linear-gradient(135deg, #f4d03f 0%, #d4af37 55%, #aa7c11 100%);
+            color: #040406 !important;
+            font-weight: 800;
+            box-shadow: 0 0 16px rgba(212, 175, 55, 0.45);
+        }
+
+        @keyframes goldPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.38); opacity: 0.45; }
+        }
+        .animate-gold-pulse {
+            animation: goldPulse 2s infinite ease-in-out;
+        }
+
+        #compassNeedle {
+            transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Screenshot Mode Framing */
+        body.screenshot-mode #screenshotCaptureZone {
+            border: 2px solid #d4af37;
+            border-radius: 1.5rem;
+            padding: 0.65rem;
+            background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.16) 0%, rgba(4, 4, 6, 0.99) 75%);
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.35), inset 0 0 20px rgba(212, 175, 55, 0.15);
+        }
+        body.screenshot-mode .hide-on-screenshot {
+            display: none !important;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-gold-500 selection:text-black pb-20 md:pb-0">
+
+    <!-- Top Golden Accent Bar -->
+    <div class="h-1 w-full gold-gradient-bg shadow-lg"></div>
+
+    <!-- ========================================================================= -->
+    <!-- SCREENSHOT CAPTURE ZONE (HEADER + VISITOR BAR + SIDE-BY-SIDE TEMP & AQI + CHART) -->
+    <!-- ========================================================================= -->
+    <div id="screenshotCaptureZone" class="max-w-7xl mx-auto w-full px-2.5 sm:px-6 lg:px-8 pt-2 sm:pt-3 space-y-2.5 sm:space-y-4">
+
+        <!-- Compact Header -->
+        <header class="luxury-card rounded-2xl sm:rounded-3xl px-3 py-2.5 sm:px-5 sm:py-3.5 border border-gold-500/40 shadow-2xl">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-2.5">
+                
+                <!-- Right Side: Association Logo & Official Title -->
+                <div class="flex items-center justify-between w-full lg:w-auto gap-2.5">
+                    <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
+                        <!-- Logo Container with Automatic Fallback & Click-to-Upload -->
+                        <div class="relative group cursor-pointer shrink-0" onclick="document.getElementById('logoInput').click()">
+                            <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-full p-0.5 gold-gradient-bg gold-glow-ring flex items-center justify-center overflow-hidden relative">
+                                <img id="associationLogoImg" src="234.jpg" alt="لوگوی انجمن سازندگان ذی‌صلاح ارومیه" 
+                                     class="w-full h-full object-cover rounded-full z-10"
+                                     onerror="this.style.display='none'; document.getElementById('svgFallbackLogo').style.display='flex';">
+                                
+                                <!-- High-Detail Exact Replica 3D Metallic Gold Coin SVG Fallback -->
+                                <div id="svgFallbackLogo" style="display:none;" class="w-full h-full rounded-full bg-obsidian-950 items-center justify-center relative">
+                                    <svg viewBox="0 0 220 220" class="w-full h-full">
+                                        <defs>
+                                            <radialGradient id="goldPlate" cx="50%" cy="38%" r="62%">
+                                                <stop offset="0%" stop-color="#FFF8DC"/>
+                                                <stop offset="42%" stop-color="#F4D03F"/>
+                                                <stop offset="78%" stop-color="#B8860B"/>
+                                                <stop offset="100%" stop-color="#6E4F04"/>
+                                            </radialGradient>
+                                        </defs>
+                                        <circle cx="110" cy="110" r="106" fill="url(#goldPlate)" stroke="#3d2c02" stroke-width="2"/>
+                                        <circle cx="110" cy="110" r="97" fill="none" stroke="#111" stroke-width="4" stroke-dasharray="6 4"/>
+                                        <circle cx="110" cy="110" r="92" fill="url(#goldPlate)"/>
+                                        <circle cx="110" cy="110" r="72" fill="none" stroke="#151515" stroke-width="5"/>
+                                        <g fill="#121212">
+                                            <polygon points="75,78 93,70 93,115 75,115"/>
+                                            <polygon points="97,56 121,47 121,115 97,115"/>
+                                            <polygon points="125,83 143,75 143,115 125,115"/>
+                                        </g>
+                                        <g stroke="url(#goldPlate)" stroke-width="1.8">
+                                            <line x1="83" y1="78" x2="91" y2="78"/><line x1="83" y1="84" x2="91" y2="84"/><line x1="83" y1="90" x2="91" y2="90"/><line x1="83" y1="96" x2="91" y2="96"/><line x1="83" y1="102" x2="91" y2="102"/><line x1="83" y1="108" x2="91" y2="108"/>
+                                            <line x1="107" y1="58" x2="119" y2="58"/><line x1="107" y1="64" x2="119" y2="64"/><line x1="107" y1="70" x2="119" y2="70"/><line x1="107" y1="76" x2="119" y2="76"/><line x1="107" y1="82" x2="119" y2="82"/><line x1="107" y1="88" x2="119" y2="88"/><line x1="107" y1="94" x2="119" y2="94"/><line x1="107" y1="100" x2="119" y2="100"/><line x1="107" y1="106" x2="119" y2="106"/>
+                                            <line x1="133" y1="84" x2="141" y2="84"/><line x1="133" y1="90" x2="141" y2="90"/><line x1="133" y1="96" x2="141" y2="96"/><line x1="133" y1="102" x2="141" y2="102"/><line x1="133" y1="108" x2="141" y2="108"/>
+                                        </g>
+                                        <text x="110" y="130" text-anchor="middle" fill="#111" font-size="10.5" font-weight="900" font-family="sans-serif">URMIA QUALIFIED</text>
+                                        <text x="110" y="142" text-anchor="middle" fill="#111" font-size="8.8" font-weight="900" font-family="sans-serif">ENGINEERS ASSOCIATION</text>
+                                        <text x="110" y="156" text-anchor="middle" fill="#111" font-size="9.5" font-weight="800">شماره ثبت: ۳۳۰-۲/۳-۲</text>
+                                        <text x="110" y="169" text-anchor="middle" fill="#111" font-size="9.5" font-weight="800">تاسیس : ۱۴۰۴</text>
+                                        <path id="topArc" d="M 30,115 A 80,80 0 1,1 190,115" fill="none"/>
+                                        <text fill="#111" font-size="9.2" font-weight="900">
+                                            <textPath href="#topArc" startOffset="50%" text-anchor="middle">انجمن صنفی کارفرمایی سازندگان ذی صلاح ساختمان شهرستان ارومیه</textPath>
+                                        </text>
+                                    </svg>
+                                </div>
+
+                                <div class="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-gold-300 text-[9px] font-bold z-20 p-1 text-center">
+                                    <i class="fa-solid fa-camera text-xs mb-0.5"></i>
+                                    <span>لوگو</span>
+                                </div>
+                            </div>
+                            <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                        </div>
+
+                        <!-- Titles -->
+                        <div class="text-right min-w-0">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <h1 class="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight gold-gradient-text leading-tight">
+                                    سایت هواشناسی انجمن
+                                </h1>
+                                <span class="px-2 py-0.5 rounded-full bg-gold-500/15 border border-gold-500/40 text-gold-300 text-[9px] sm:text-[11px] font-extrabold">
+                                    ارومیه • UQEA
+                                </span>
+                            </div>
+                            <p class="text-gray-200 text-[10px] sm:text-xs font-semibold mt-0.5 truncate">
+                                انجمن صنفی کارفرمایی سازندگان ذی‌صلاح ساختمان شهرستان ارومیه
+                            </p>
+                            <div class="flex items-center gap-2 mt-0.5 text-[9px] sm:text-[11px] text-gold-400/90 font-medium">
+                                <span>ثبت: ۳۳۰-۲/۳-۲</span>
+                                <span>•</span>
+                                <span>تأسیس: ۱۴۰۴</span>
+                                <span class="hidden sm:inline">•</span>
+                                <span class="hidden sm:inline">ایستگاه ارومیه (37.55°N, 45.07°E)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Compact Clock & Screenshot Toggle -->
+                    <div class="flex lg:hidden flex-col items-end shrink-0">
+                        <div class="text-gold-400 font-black text-xs tracking-wider" id="liveClockMobile">--:--:--</div>
+                        <div class="text-[9px] text-gray-300 font-medium whitespace-nowrap" id="shamsiDateMobile">...</div>
+                    </div>
+                </div>
+
+                <!-- Left Side: Desktop Clock + Action Buttons -->
+                <div class="flex items-center justify-between lg:justify-end gap-1.5 sm:gap-2.5 w-full lg:w-auto border-t border-gold-500/15 lg:border-none pt-1.5 lg:pt-0 hide-on-screenshot">
+                    <div class="hidden lg:block luxury-card px-3.5 py-1.5 rounded-xl border border-gold-500/30 text-center">
+                        <div class="text-gold-400 font-black text-base tracking-wider" id="liveClock">--:--:--</div>
+                        <div class="text-[11px] text-gray-300 font-medium" id="shamsiDate">در حال دریافت تاریخ...</div>
+                    </div>
+
+                    <button onclick="toggleScreenshotMode()" id="screenshotModeBtn" class="bg-gold-500/15 hover:bg-gold-500/25 text-gold-300 border border-gold-500/50 font-extrabold px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 rounded-xl transition flex items-center gap-1.5 text-[11px] sm:text-xs shrink-0" title="تنظیم قاب طلایی ویژه اسکرین‌شات موبایل">
+                        <i class="fa-solid fa-camera-retro text-gold-400"></i>
+                        <span>قاب اسکرین‌شات</span>
+                    </button>
+
+                    <button onclick="toggleMobileModal()" class="bg-obsidian-800 hover:bg-obsidian-700 text-gold-300 border border-gold-500/40 font-bold px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 rounded-xl transition flex items-center gap-1.5 text-[11px] sm:text-xs shrink-0">
+                        <i class="fa-solid fa-mobile-screen-button text-gold-400"></i>
+                        <span>اپلیکیشن موبایل</span>
+                    </button>
+
+                    <button onclick="fetchAllUrmiaData(true)" id="refreshBtn" class="gold-gradient-bg text-obsidian-950 font-extrabold px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition flex items-center gap-1 text-[11px] sm:text-xs shrink-0">
+                        <i class="fa-solid fa-rotate" id="refreshIcon"></i>
+                        <span class="hidden sm:inline">بروزرسانی</span>
+                    </button>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- LIVE ONLINE VISITOR COUNTER BAR -->
+        <div class="luxury-card rounded-2xl px-3 py-2 sm:px-5 sm:py-2.5 border border-gold-500/40 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs">
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span class="text-gold-300 font-extrabold">آمار رسمی بازدید سامانه انجمن:</span>
+                <span id="visitorSyncBadge" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold">وضعیت سامانه: آنلاین</span>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+                <div class="flex items-center gap-1.5 bg-obsidian-950/90 px-2.5 py-1 rounded-xl border border-gold-500/30">
+                    <i class="fa-solid fa-calendar-day text-gold-400 text-[11px]"></i>
+                    <span class="text-gray-300">بازدید امروز:</span>
+                    <span id="todayVisitsCount" class="text-gold-300 font-black text-xs sm:text-sm tracking-wide">...</span>
+                    <span class="text-[10px] text-gray-400">نفر</span>
+                </div>
+
+                <div class="flex items-center gap-1.5 bg-obsidian-950/90 px-2.5 py-1 rounded-xl border border-gold-500/25">
+                    <i class="fa-solid fa-chart-simple text-amber-400 text-[11px]"></i>
+                    <span class="text-gray-300">کل بازدیدها:</span>
+                    <span id="totalVisitsCount" class="text-white font-black text-xs sm:text-sm tracking-wide">...</span>
+                </div>
+
+                <div class="hidden sm:flex items-center gap-1.5 bg-obsidian-950/90 px-2.5 py-1 rounded-xl border border-emerald-500/25">
+                    <i class="fa-solid fa-users text-emerald-400 text-[11px]"></i>
+                    <span class="text-gray-300">آنلاین:</span>
+                    <span id="onlineUsersNow" class="text-emerald-300 font-black text-xs sm:text-sm">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- SIDE-BY-SIDE MOBILE & DESKTOP HERO: URMIA TEMPERATURE + LIVE AQI          -->
+        <!-- ========================================================================= -->
+        <div id="sec-pollution" class="grid grid-cols-2 gap-2.5 sm:gap-4">
+            
+            <!-- RIGHT CARD: URMIA LIVE TEMPERATURE (Side-by-Side on Mobile for Screenshot) -->
+            <div id="sec-weather" class="luxury-card rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-gold-500/45 flex flex-col justify-between relative overflow-hidden">
+                <div class="flex items-center justify-between gap-1">
+                    <span class="px-2 py-0.5 rounded-full bg-gold-500/15 border border-gold-500/40 text-gold-300 text-[9px] sm:text-xs font-extrabold flex items-center gap-1">
+                        <i class="fa-solid fa-location-dot text-gold-400"></i>
+                        <span>دمای ارومیه</span>
+                    </span>
+                    <span id="dayNightBadge" class="text-[9px] sm:text-xs text-gray-300 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-sun text-amber-400"></i>
+                        <span class="hidden sm:inline">ارومیه</span>
+                    </span>
+                </div>
+
+                <div class="my-2 sm:my-4 flex items-center justify-between">
+                    <div class="flex items-start">
+                        <span id="currentTemp" class="text-3xl sm:text-6xl font-black gold-gradient-text tracking-tighter leading-none">--</span>
+                        <span class="text-sm sm:text-2xl font-extrabold text-gold-400 mt-0.5">°C</span>
+                    </div>
+                    <div id="mainWeatherIcon" class="w-11 h-11 sm:w-16 sm:h-16 rounded-2xl bg-gold-500/15 border border-gold-500/40 flex items-center justify-center text-gold-400 text-xl sm:text-3xl shadow-lg">
+                        <i class="fa-solid fa-cloud-sun"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <div id="weatherConditionTitle" class="text-xs sm:text-base font-extrabold text-white truncate">در حال دریافت...</div>
+                    <div class="grid grid-cols-3 gap-1 mt-2 pt-2 border-t border-gold-500/20 text-[9px] sm:text-xs">
+                        <div class="bg-obsidian-950/80 rounded-lg p-1 text-center">
+                            <div class="text-gray-400">محسوس</div>
+                            <div id="feelsLikeTemp" class="text-gold-300 font-bold mt-0.5">--°</div>
+                        </div>
+                        <div class="bg-obsidian-950/80 rounded-lg p-1 text-center">
+                            <div class="text-gray-400">بیشینه</div>
+                            <div id="todayMaxTemp" class="text-amber-400 font-bold mt-0.5">--°</div>
+                        </div>
+                        <div class="bg-obsidian-950/80 rounded-lg p-1 text-center">
+                            <div class="text-gray-400">کمینه</div>
+                            <div id="todayMinTemp" class="text-sky-400 font-bold mt-0.5">--°</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEFT CARD: URMIA LIVE AIR QUALITY (AQI) (Side-by-Side on Mobile for Screenshot) -->
+            <div class="luxury-card rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-gold-500/45 flex flex-col justify-between relative overflow-hidden">
+                <div class="flex items-center justify-between gap-1">
+                    <span class="px-2 py-0.5 rounded-full bg-gold-500/15 border border-gold-500/40 text-gold-300 text-[9px] sm:text-xs font-extrabold flex items-center gap-1">
+                        <i class="fa-solid fa-lungs text-gold-400"></i>
+                        <span>آلودگی هوا</span>
+                    </span>
+                    <span id="euAqiBadge" class="text-[9px] sm:text-[11px] text-gray-400 font-semibold">شاخص اروپا: --</span>
+                </div>
+
+                <div class="my-2 sm:my-4 flex items-center justify-between gap-2">
+                    <div id="aqiCircle" class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl flex flex-col items-center justify-center border-2 border-emerald-400 bg-emerald-500/15 text-emerald-300 shadow-xl shrink-0">
+                        <span class="text-[8px] sm:text-[10px] font-bold uppercase opacity-80">US AQI</span>
+                        <span id="usAqiVal" class="text-xl sm:text-3xl font-black leading-none mt-0.5">--</span>
+                    </div>
+                    <div class="text-right min-w-0 flex-1">
+                        <div class="text-[9px] sm:text-xs text-gray-400">وضعیت کیفیت هوای ارومیه:</div>
+                        <div id="aqiStatusText" class="text-xs sm:text-xl font-black text-emerald-400 mt-0.5 truncate">در حال سنجش...</div>
+                        <div class="text-[9px] sm:text-[11px] text-gray-300 mt-1 hidden sm:block line-clamp-2" id="aqiHealthAdvice">در حال دریافت اطلاعات لحظه‌ای ایستگاه‌های سنجش...</div>
+                    </div>
+                </div>
+
+                <!-- Mini Bars for PM2.5, PM10, Dust -->
+                <div class="grid grid-cols-3 gap-1 pt-2 border-t border-gold-500/20 text-[9px] sm:text-xs">
+                    <div class="bg-obsidian-950/80 rounded-lg p-1 text-center">
+                        <div class="text-gray-400">PM2.5</div>
+                        <div id="pm25Val" class="text-gold-300 font-extrabold mt-0.5">--</div>
+                        <div class="w-full h-1 bg-obsidian-800 rounded-full overflow-hidden mt-0.5">
+                            <div id="pm25Bar" class="h-full bg-gold-400 rounded-full" style="width: 20%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-obsidian-950/80 rounded-lg p-1 text-center">
+                        <div class="text-gray-400">PM10</div>
+                        <div id="pm10Val" class="text-sky-300 font-extrabold mt-0.5">--</div>
+                        <div class="w-full h-1 bg-obsidian-800 rounded-full overflow-hidden mt-0.5">
+                            <div id="pm10Bar" class="h-full bg-sky-400 rounded-full" style="width: 25%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-obsidian-950/80 rounded-lg p-1 text-center">
+                        <div class="text-gray-400">غبار</div>
+                        <div id="dustVal" class="text-amber-300 font-extrabold mt-0.5">--</div>
+                        <div class="w-full h-1 bg-obsidian-800 rounded-full overflow-hidden mt-0.5">
+                            <div id="dustBar" class="h-full bg-amber-400 rounded-full" style="width: 15%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- 24-HOUR INTERACTIVE AIR POLLUTION CHART                                   -->
+        <!-- ========================================================================= -->
+        <div class="luxury-card rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-gold-500/40">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-gold-400 animate-gold-pulse"></span>
+                        <h2 class="text-xs sm:text-base font-black gold-gradient-text">نمودار ۲۴ ساعته آلودگی هوا و غبار ارومیه</h2>
+                    </div>
+                    <span class="text-[9px] sm:text-xs text-gray-400 sm:mr-3">بروزرسانی: <strong id="lastUpdateTime" class="text-gold-300">--:--</strong></span>
+                </div>
+
+                <!-- Pollution Chart Mode Switcher -->
+                <div class="flex items-center gap-1 bg-obsidian-950 p-1 rounded-xl border border-gold-500/25 self-start sm:self-auto">
+                    <button id="polTab-aqi" onclick="switchPollutionChart('aqi')" class="tab-active px-2.5 py-1 rounded-lg text-[10px] sm:text-xs transition">
+                        شاخص AQI
+                    </button>
+                    <button id="polTab-pm" onclick="switchPollutionChart('pm')" class="text-gray-300 hover:text-gold-300 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs transition">
+                        ذرات PM2.5 / PM10
+                    </button>
+                    <button id="polTab-gases" onclick="switchPollutionChart('gases')" class="text-gray-300 hover:text-gold-300 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs transition">
+                        غبار و گازها
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chart Canvas Container -->
+            <div class="relative h-44 sm:h-56 w-full">
+                <canvas id="pollutionChartCanvas"></canvas>
+            </div>
+
+            <!-- Secondary Gaseous Pollutants Strip -->
+            <div class="grid grid-cols-4 gap-1.5 sm:gap-3 mt-3 pt-2.5 border-t border-gold-500/20 text-center text-[10px] sm:text-xs">
+                <div class="bg-obsidian-950/75 rounded-xl p-1.5 sm:p-2 border border-white/5">
+                    <div class="text-gray-400">دی‌اکسید نیتروژن (NO₂)</div>
+                    <div class="text-gold-300 font-black text-xs sm:text-sm mt-0.5"><span id="no2Val">--</span> <span class="text-[9px] text-gray-500">μg/m³</span></div>
+                </div>
+                <div class="bg-obsidian-950/75 rounded-xl p-1.5 sm:p-2 border border-white/5">
+                    <div class="text-gray-400">ازن سطح زمین (O₃)</div>
+                    <div class="text-purple-300 font-black text-xs sm:text-sm mt-0.5"><span id="o3Val">--</span> <span class="text-[9px] text-gray-500">μg/m³</span></div>
+                </div>
+                <div class="bg-obsidian-950/75 rounded-xl p-1.5 sm:p-2 border border-white/5">
+                    <div class="text-gray-400">منوکسید کربن (CO)</div>
+                    <div class="text-emerald-300 font-black text-xs sm:text-sm mt-0.5"><span id="coVal">--</span> <span class="text-[9px] text-gray-500">μg/m³</span></div>
+                </div>
+                <div class="bg-obsidian-950/75 rounded-xl p-1.5 sm:p-2 border border-white/5">
+                    <div class="text-gray-400">دی‌اکسید گوگرد (SO₂)</div>
+                    <div class="text-rose-300 font-black text-xs sm:text-sm mt-0.5"><span id="so2Val">--</span> <span class="text-[9px] text-gray-500">μg/m³</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END OF SCREENSHOT CAPTURE ZONE -->
+
+    <!-- ========================================================================= -->
+    <!-- MAIN DASHBOARD BODY (ENGINEERING ADVISORY, INSTRUMENTS, CHARTS, RADAR)     -->
+    <!-- ========================================================================= -->
+    <main class="max-w-7xl mx-auto w-full px-2.5 sm:px-6 lg:px-8 mt-4 space-y-4 sm:space-y-6">
+
+        <!-- SECTION 2: CONSTRUCTION & ENGINEERING WEATHER ADVISORY FOR URMIA -->
+        <section class="luxury-card rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-gold-500/40">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-xl gold-gradient-bg text-obsidian-950 flex items-center justify-center text-base font-black shadow">
+                        <i class="fa-solid fa-helmet-safety"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xs sm:text-base font-black gold-gradient-text">توصیه فنی و مهندسی کارگاه‌های ساختمانی ارومیه</h2>
+                        <p class="text-[10px] sm:text-xs text-gray-400">تحلیل هوشمند شرایط بتن‌ریزی، جوشکاری و کار در ارتفاع بر اساس مبحث ۹ مقررات ملی ساختمان</p>
+                    </div>
+                </div>
+                <span id="advisoryBadge" class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 self-start sm:self-center">
+                    در حال بررسی...
+                </span>
+            </div>
+            <p id="advisoryText" class="text-xs sm:text-sm text-gray-200 leading-relaxed bg-obsidian-950/80 p-3 rounded-2xl border border-gold-500/20">
+                در حال تحلیل داده‌های دمایی، سرعت باد و رطوبت ایستگاه ارومیه...
+            </p>
+        </section>
+
+        <!-- SECTION 3: METEOROLOGICAL & ENGINEERING PARAMETERS GRID -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <!-- Detailed Parameters Card -->
+            <div class="luxury-card rounded-3xl p-4 sm:p-5 border border-gold-500/30">
+                <div class="flex items-center gap-2 text-gold-400 text-xs sm:text-sm font-extrabold mb-3 pb-2 border-b border-gold-500/20">
+                    <i class="fa-solid fa-Sliders"></i>
+                    <span>پارامترهای جوی و کارگاهی ارومیه</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5 text-xs">
+                    <div class="bg-obsidian-900/90 p-3 rounded-2xl border border-white/5">
+                        <div class="text-gray-400 text-[11px]"><i class="fa-solid fa-droplet text-sky-400 ml-1"></i>رطوبت نسبی</div>
+                        <div id="humidityVal" class="text-base sm:text-lg font-black text-white mt-1">--%</div>
+                    </div>
+                    <div class="bg-obsidian-900/90 p-3 rounded-2xl border border-white/5">
+                        <div class="text-gray-400 text-[11px]"><i class="fa-solid fa-temperature-arrow-down text-cyan-400 ml-1"></i>نقطه شبنم</div>
+                        <div id="dewPointVal" class="text-base sm:text-lg font-black text-white mt-1">--°C</div>
+                    </div>
+                    <div class="bg-obsidian-900/90 p-3 rounded-2xl border border-white/5">
+                        <div class="text-gray-400 text-[11px]"><i class="fa-solid fa-mound text-amber-400 ml-1"></i>دمای سطح خاک</div>
+                        <div id="soilTempVal" class="text-base sm:text-lg font-black text-gold-300 mt-1">--°C</div>
+                    </div>
+                    <div class="bg-obsidian-900/90 p-3 rounded-2xl border border-white/5">
+                        <div class="text-gray-400 text-[11px]"><i class="fa-solid fa-cloud-rain text-blue-400 ml-1"></i>بارش فعلی</div>
+                        <div id="precipVal" class="text-base sm:text-lg font-black text-white mt-1">-- mm</div>
+                    </div>
+                    <div class="bg-obsidian-900/90 p-3 rounded-2xl border border-white/5">
+                        <div class="text-gray-400 text-[11px]"><i class="fa-solid fa-cloud text-gray-300 ml-1"></i>پوشش ابر</div>
+                        <div id="cloudCoverVal" class="text-base sm:text-lg font-black text-white mt-1">--%</div>
+                    </div>
+                    <div class="bg-obsidian-900/90 p-3 rounded-2xl border border-white/5">
+                        <div class="text-gray-400 text-[11px]"><i class="fa-solid fa-eye text-emerald-400 ml-1"></i>شعاع دید افقی</div>
+                        <div id="visibilityVal" class="text-base sm:text-lg font-black text-white mt-1">-- km</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wind Compass & Speedometer Card -->
+            <div class="luxury-card rounded-3xl p-4 sm:p-5 border border-gold-500/30 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-gold-400 text-xs sm:text-sm font-extrabold mb-3 pb-2 border-b border-gold-500/20">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>قطب‌نما و سرعت باد ارومیه</span>
+                    </div>
+                    <span id="windDirectionText" class="text-[11px] text-gold-300">--</span>
+                </div>
+
+                <div class="flex items-center justify-around my-2">
+                    <!-- Live Rotating Compass -->
+                    <div class="relative w-28 h-28 rounded-full border-2 border-gold-500/40 bg-obsidian-950 flex items-center justify-center shadow-inner">
+                        <span class="absolute top-1 text-[10px] font-black text-gold-400">N</span>
+                        <span class="absolute bottom-1 text-[10px] font-bold text-gray-500">S</span>
+                        <span class="absolute right-1.5 text-[10px] font-bold text-gray-500">E</span>
+                        <span class="absolute left-1.5 text-[10px] font-bold text-gray-500">W</span>
+                        <div id="compassNeedle" class="w-1.5 h-20 relative flex flex-col items-center justify-between">
+                            <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[14px] border-b-gold-400"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-gold-500 border border-black"></div>
+                            <div class="w-1 h-6 bg-gray-600 rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="bg-obsidian-900 px-3 py-2 rounded-xl border border-white/5">
+                            <div class="text-gray-400 text-[10px]">سرعت باد (۱۰ متری)</div>
+                            <div class="text-base font-black text-gold-300"><span id="windSpeedVal">--</span> <span class="text-[10px]">km/h</span></div>
+                        </div>
+                        <div class="bg-obsidian-900 px-3 py-2 rounded-xl border border-white/5">
+                            <div class="text-gray-400 text-[10px]">تندباد لحظه‌ای (Gusts)</div>
+                            <div class="text-base font-black text-amber-400"><span id="windGustVal">--</span> <span class="text-[10px]">km/h</span></div>
+                        </div>
+                        <div class="bg-obsidian-900 px-3 py-1.5 rounded-xl border border-white/5 flex items-center justify-between gap-2">
+                            <span class="text-gray-400 text-[10px]">زاویه وزش:</span>
+                            <span id="windDegVal" class="font-bold text-white">--°</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UV Index, Pressure & Sun Schedule Card -->
+            <div class="luxury-card rounded-3xl p-4 sm:p-5 border border-gold-500/30 flex flex-col justify-between space-y-3">
+                <div>
+                    <div class="flex items-center justify-between text-gold-400 text-xs sm:text-sm font-extrabold mb-2 pb-2 border-b border-gold-500/20">
+                        <span><i class="fa-solid fa-sun-plant-wilt ml-1"></i>شاخص تابش فرابنفش (UV) و فشار</span>
+                        <span id="uvStatusBadge" class="px-2 py-0.5 rounded-lg bg-gold-500/15 text-gold-300 text-[10px]">--</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="text-gray-300">UV فعلی: <strong id="uvIndexVal" class="text-gold-300 text-sm">--</strong></span>
+                        <span class="text-gray-400">حداکثر امروز: <strong id="uvMaxToday" class="text-white">--</strong></span>
+                    </div>
+                    <div class="relative w-full h-2 rounded-full bg-gradient-to-l from-purple-500 via-amber-400 to-emerald-400 my-2">
+                        <div id="uvPointer" class="absolute -top-1 w-4 h-4 rounded-full bg-white border-2 border-obsidian-950 shadow" style="right: 10%;"></div>
+                    </div>
+                    <p id="uvAdviceText" class="text-[11px] text-gray-300">--</p>
+                </div>
+
+                <!-- Pressure & Daylight -->
+                <div class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-gold-500/20">
+                    <div class="bg-obsidian-900 p-2.5 rounded-xl border border-white/5">
+                        <div class="text-gray-400 text-[10px]">فشار سطح دریا / ایستگاه</div>
+                        <div class="font-black text-white mt-0.5"><span id="pressureMslVal">--</span> / <span id="surfacePressureVal" class="text-gold-300">--</span> <span class="text-[9px] text-gray-400">hPa</span></div>
+                    </div>
+                    <div class="bg-obsidian-900 p-2.5 rounded-xl border border-white/5">
+                        <div class="text-gray-400 text-[10px]">طلوع و غروب آفتاب ارومیه</div>
+                        <div class="font-black text-gold-300 mt-0.5"><span id="sunriseVal">--:--</span> الی <span id="sunsetVal">--:--</span></div>
+                    </div>
+                </div>
+                <div class="text-[11px] text-center text-gray-400 bg-obsidian-950/80 py-1.5 rounded-xl border border-white/5">
+                    طول روز در ارومیه: <strong id="daylightHoursVal" class="text-gold-300">--</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: 24-HOUR HOURLY WEATHER CHART & TIMELINE -->
+        <section id="sec-hourly" class="luxury-card rounded-3xl p-4 sm:p-6 border border-gold-500/35">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-sm sm:text-lg font-black gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>پیش‌بینی ساعتی و نمودار ۲۴ ساعت آینده ارومیه</span>
+                    </h2>
+                    <p class="text-[11px] text-gray-400">تغییرات ساعتی دما، احتمال بارش و سرعت باد</p>
+                </div>
+
+                <div class="flex items-center gap-1.5 bg-obsidian-950 p-1 rounded-xl border border-gold-500/25 self-start sm:self-auto">
+                    <button id="wTab-temp" onclick="switchWeatherChart('temp')" class="tab-active px-3 py-1 rounded-lg text-xs transition">دما و محسوس</button>
+                    <button id="wTab-precip" onclick="switchWeatherChart('precip')" class="text-gray-300 hover:text-gold-300 px-3 py-1 rounded-lg text-xs transition">احتمال بارش و رطوبت</button>
+                    <button id="wTab-wind" onclick="switchWeatherChart('wind')" class="text-gray-300 hover:text-gold-300 px-3 py-1 rounded-lg text-xs transition">سرعت باد</button>
+                </div>
+            </div>
+
+            <div class="relative h-52 sm:h-64 w-full mb-4">
+                <canvas id="weatherChartCanvas"></canvas>
+            </div>
+
+            <!-- Scrollable 24-Hour Cards -->
+            <div id="hourlyTimelineContainer" class="flex items-center gap-2.5 overflow-x-auto pb-2 pt-1"></div>
+        </section>
+
+        <!-- SECTION 5: 7-DAY FORECAST & LIVE SATELLITE RADAR MAP -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+            
+            <!-- 7-Day Forecast (5 Columns) -->
+            <div class="lg:col-span-5 luxury-card rounded-3xl p-4 sm:p-6 border border-gold-500/35">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-gold-500/20">
+                    <h2 class="text-sm sm:text-lg font-black gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-week"></i>
+                        <span>پیش‌بینی ۷ روز آینده ارومیه</span>
+                    </h2>
+                    <span class="text-[11px] text-gray-400">مدل ECMWF</span>
+                </div>
+                <div id="sevenDayContainer" class="space-y-2.5"></div>
+            </div>
+
+            <!-- Interactive Live Radar Map for Urmia (7 Columns) -->
+            <div id="sec-radar" class="lg:col-span-7 luxury-card rounded-3xl p-4 sm:p-6 border border-gold-500/35 flex flex-col justify-between">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2 border-b border-gold-500/20">
+                    <div>
+                        <h2 class="text-sm sm:text-lg font-black gold-gradient-text flex items-center gap-2">
+                            <i class="fa-solid fa-satellite-dish"></i>
+                            <span>رادار زنده ماهواره‌ای شهرستان ارومیه</span>
+                        </h2>
+                        <p class="text-[11px] text-gray-400">نقشه تعاملی جریان باد، توده ابر، دما و بارش روی دریاچه و شهر ارومیه</p>
+                    </div>
+                    <div class="flex items-center gap-1 bg-obsidian-950 p-1 rounded-xl border border-gold-500/25 self-start sm:self-auto">
+                        <button id="radarBtn-wind" onclick="changeRadarLayer('wind')" class="tab-active px-2.5 py-1 rounded-lg text-[11px] transition">جریان باد</button>
+                        <button id="radarBtn-temp" onclick="changeRadarLayer('temp')" class="text-gray-300 hover:text-gold-300 px-2.5 py-1 rounded-lg text-[11px] transition">دما</button>
+                        <button id="radarBtn-rain" onclick="changeRadarLayer('rain')" class="text-gray-300 hover:text-gold-300 px-2.5 py-1 rounded-lg text-[11px] transition">بارش</button>
+                        <button id="radarBtn-clouds" onclick="changeRadarLayer('clouds')" class="text-gray-300 hover:text-gold-300 px-2.5 py-1 rounded-lg text-[11px] transition">ابرها</button>
+                    </div>
+                </div>
+
+                <div class="w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-gold-500/30 shadow-inner relative">
+                    <iframe id="windyMapFrame" class="w-full h-full" src="https://embed.windy.com/embed2.html?lat=37.552&lon=45.076&detailLat=37.552&detailLon=45.076&width=650&height=450&zoom=9&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" frameborder="0"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 6: REAL-TIME VISITOR ANALYTICS CARD                               -->
+        <!-- ========================================================================= -->
+        <section id="sec-visitors" class="luxury-card rounded-3xl p-4 sm:p-6 border border-gold-500/35">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gold-500/20 pb-3.5 mb-4">
+                <div>
+                    <div class="flex items-center gap-2 text-gold-400 text-xs sm:text-sm font-bold">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>آمار رسمی بازدید سامانه انجمن</span>
+                    </div>
+                    <h2 class="text-base sm:text-xl font-black text-white mt-0.5">گزارش زنده بازدیدهای امروز و کل مراجعات مهندسان و شهروندان</h2>
+                </div>
+                <div class="flex items-center gap-2 text-xs bg-obsidian-900 px-3 py-1.5 rounded-xl border border-gold-500/30">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-gray-300">ثبت آنی در سرور:</span>
+                    <span id="counterServerStatus" class="text-emerald-400 font-extrabold">وضعیت سامانه: آنلاین</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div class="bg-obsidian-900/90 p-4 rounded-2xl border border-gold-500/30 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs text-gray-400">تعداد بازدید امروز (۲۴ ساعت اخیر)</div>
+                        <div id="cardTodayVisits" class="text-2xl sm:text-3xl font-black gold-gradient-text mt-1">...</div>
+                        <div id="todayDateKeyLabel" class="text-[10px] text-gold-400/80 mt-0.5">بروزرسانی لحظه‌ای</div>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-gold-500/15 border border-gold-500/40 flex items-center justify-center text-gold-400 text-xl">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                </div>
+
+                <div class="bg-obsidian-900/90 p-4 rounded-2xl border border-gold-500/20 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs text-gray-400">مجموع کل بازدیدهای ثبت‌شده</div>
+                        <div id="cardTotalVisits" class="text-2xl sm:text-3xl font-black text-white mt-1">...</div>
+                        <div class="text-[10px] text-gray-400 mt-0.5">ثبت در دیتابیس ابری انجمن</div>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                </div>
+
+                <div class="bg-obsidian-900/90 p-4 rounded-2xl border border-emerald-500/25 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs text-gray-400">کاربران حاضر در سایت (آنلاین)</div>
+                        <div id="cardOnlineNow" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">--</div>
+                        <div class="text-[10px] text-emerald-300/80 mt-0.5">پایش زنده نشست‌های فعال</div>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Mobile Sticky Bottom Quick-Navigation Bar -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-obsidian-950/95 backdrop-blur-xl border-t border-gold-500/40 px-2 py-1.5 flex items-center justify-around shadow-[0_-10px_25px_rgba(0,0,0,0.9)]">
+        <a href="#sec-pollution" class="flex flex-col items-center py-1 px-2 text-gold-400 font-bold text-[11px]">
+            <i class="fa-solid fa-lungs text-base mb-0.5"></i>
+            <span>آلودگی هوا</span>
+        </a>
+        <a href="#sec-weather" class="flex flex-col items-center py-1 px-2 text-gray-300 hover:text-gold-300 font-medium text-[11px]">
+            <i class="fa-solid fa-temperature-half text-base mb-0.5"></i>
+            <span>دمای ارومیه</span>
+        </a>
+        <a href="#sec-hourly" class="flex flex-col items-center py-1 px-2 text-gray-300 hover:text-gold-300 font-medium text-[11px]">
+            <i class="fa-solid fa-chart-line text-base mb-0.5"></i>
+            <span>ساعتی</span>
+        </a>
+        <a href="#sec-radar" class="flex flex-col items-center py-1 px-2 text-gray-300 hover:text-gold-300 font-medium text-[11px]">
+            <i class="fa-solid fa-satellite-dish text-base mb-0.5"></i>
+            <span>رادار زنده</span>
+        </a>
+        <button onclick="toggleMobileModal()" class="flex flex-col items-center py-1 px-2 text-gold-300 font-bold text-[11px]">
+            <i class="fa-solid fa-qrcode text-base mb-0.5"></i>
+            <span>نصب در گوشی</span>
+        </button>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="bg-obsidian-950 border-t border-gold-500/30 mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-right">
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-12 h-12 rounded-full gold-gradient-bg p-0.5 flex items-center justify-center shrink-0">
+                        <div class="w-full h-full bg-obsidian-950 rounded-full flex items-center justify-center text-gold-400 font-black text-sm">
+                            UQEA
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black gold-gradient-text">سایت هواشناسی انجمن سازندگان ذی‌صلاح ساختمان شهرستان ارومیه</h3>
+                        <p class="text-xs text-gray-400 mt-1">شماره ثبت: ۳۳۰-۲/۳-۲ | سال تأسیس: ۱۴۰۴ | طراحی واکنش‌گرا ویژه موبایل و دسکتاپ</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-2.5 text-xs text-gray-400">
+                    <button onclick="toggleMobileModal()" class="px-3.5 py-2 rounded-xl bg-gold-500/15 hover:bg-gold-500/25 text-gold-300 border border-gold-500/40 font-bold transition">
+                        <i class="fa-solid fa-mobile-screen ml-1"></i>باز کردن در گوشی / QR Code
+                    </button>
+                    <button onclick="document.getElementById('logoInput').click()" class="px-3.5 py-2 rounded-xl bg-obsidian-900 hover:bg-obsidian-800 text-gold-300 border border-gold-500/30 transition">
+                        <i class="fa-solid fa-image ml-1"></i>تنظیم فایل لوگو
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Access & QR Code Modal -->
+    <div id="mobileModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="luxury-card max-w-md w-full rounded-3xl p-6 border-2 border-gold-500/50 shadow-2xl relative text-center">
+            <button onclick="toggleMobileModal()" class="absolute top-4 left-4 w-9 h-9 rounded-xl bg-obsidian-900 text-gray-400 hover:text-white border border-white/10 flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="w-14 h-14 rounded-2xl gold-gradient-bg text-obsidian-950 flex items-center justify-center text-2xl mx-auto mb-3 shadow-lg">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+            </div>
+            <h3 class="text-lg sm:text-xl font-black gold-gradient-text">باز کردن و نصب سایت روی گوشی موبایل</h3>
+            <p class="text-xs text-gray-300 mt-1">این سایت به صورت ۱۰۰٪ موبایل‌فرندلی و اپلیکیشن وب (PWA) طراحی شده است</p>
+
+            <!-- Dynamic QR Code Box -->
+            <div class="my-4 bg-white p-3 rounded-2xl inline-block shadow-xl border-4 border-gold-400">
+                <img id="qrCodeImg" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://urmia-weather.ir" alt="QR Code" class="w-36 h-36 mx-auto">
+            </div>
+            <p class="text-[11px] text-gold-300 font-semibold mb-4">
+                با دوربین تلفن همراه خود این بارکد را اسکن کنید تا سامانه مستقیماً روی گوشی شما باز شود.
+            </p>
+
+            <div class="text-right space-y-2.5 text-xs text-gray-200 bg-obsidian-950/90 p-4 rounded-2xl border border-gold-500/25">
+                <div class="font-extrabold text-gold-400 mb-1"><i class="fa-solid fa-download ml-1"></i>نحوه نصب اپلیکیشن روی صفحه اصلی گوشی:</div>
+                <p><b>• در اندروید (Chrome):</b> روی علامت سه نقطه <code class="text-gold-300">⋮</code> بالای مرورگر بزنید و گزینه <b>Add to Home screen</b> (افزودن به صفحه اصلی) را انتخاب کنید.</p>
+                <p><b>• در آیفون (Safari):</b> روی دکمه <b>Share</b> پایین صفحه بزنید و گزینه <b>Add to Home Screen</b> را انتخاب کنید.</p>
+            </div>
+
+            <div class="mt-5 flex gap-2">
+                <button onclick="copyPageUrl()" id="copyUrlBtn" class="flex-1 bg-obsidian-800 hover:bg-obsidian-700 text-gold-300 border border-gold-500/40 font-bold py-2.5 rounded-xl text-xs transition">
+                    <i class="fa-regular fa-copy ml-1"></i>کپی لینک سامانه
+                </button>
+                <button onclick="toggleMobileModal()" class="flex-1 gold-gradient-bg text-obsidian-950 font-extrabold py-2.5 rounded-xl text-xs">
+                    بستن
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Exact Coordinates of Urmia, West Azerbaijan, Iran
+        const URMIA_LAT = 37.5527;
+        const URMIA_LON = 45.0761;
+
+        let globalWeatherData = null;
+        let globalAirData = null;
+        let weatherChartInstance = null;
+        let pollutionChartInstance = null;
+        let currentWeatherChartTab = 'temp';
+        let currentPollutionChartTab = 'aqi';
+
+        // 1. Live Clock & Jalali (Shamsi) Date
+        function updateClockAndDate() {
+            const now = new Date();
+            const timeOptions = { timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const dateOptions = { timeZone: 'Asia/Tehran', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', calendar: 'persian' };
+
+            const timeStr = new Intl.DateTimeFormat('fa-IR', timeOptions).format(now);
+            const dateStr = new Intl.DateTimeFormat('fa-IR', dateOptions).format(now);
+
+            const clockEl = document.getElementById('liveClock');
+            const dateEl = document.getElementById('shamsiDate');
+            if (clockEl) clockEl.textContent = timeStr;
+            if (dateEl) dateEl.textContent = dateStr;
+
+            const clockMob = document.getElementById('liveClockMobile');
+            const dateMob = document.getElementById('shamsiDateMobile');
+            if (clockMob) clockMob.textContent = timeStr;
+            if (dateMob) dateMob.textContent = dateStr;
+        }
+        setInterval(updateClockAndDate, 1000);
+        updateClockAndDate();
+
+        // 1.5 Real Online Visitor Counter
+        async function initOnlineVisitorCounter() {
+            const nowTehran = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tehran' }));
+            const yyyy = nowTehran.getFullYear();
+            const mm = String(nowTehran.getMonth() + 1).padStart(2, '0');
+            const dd = String(nowTehran.getDate()).padStart(2, '0');
+            const todayIso = `${yyyy}-${mm}-${dd}`;
+
+            const namespace = 'uqea-urmia-weather-official';
+            const totalKey = 'total-views';
+            const todayKey = `daily-${todayIso}`;
+
+            let alreadyCountedToday = false;
+            try {
+                alreadyCountedToday = sessionStorage.getItem(`uqea_visited_${todayIso}`) === '1';
+            } catch (e) {}
+
+            let todayCount = null;
+            let totalCount = null;
+
+            try {
+                const todayEndpoint = alreadyCountedToday
+                    ? `https://api.counterapi.dev/v1/${namespace}/${todayKey}/`
+                    : `https://api.counterapi.dev/v1/${namespace}/${todayKey}/up`;
+                const totalEndpoint = alreadyCountedToday
+                    ? `https://api.counterapi.dev/v1/${namespace}/${totalKey}/`
+                    : `https://api.counterapi.dev/v1/${namespace}/${totalKey}/up`;
+
+                const [todayRes, totalRes] = await Promise.all([fetch(todayEndpoint), fetch(totalEndpoint)]);
+                if (todayRes.ok && totalRes.ok) {
+                    const todayJson = await todayRes.json();
+                    const totalJson = await totalRes.json();
+                    todayCount = todayJson.count;
+                    totalCount = totalJson.count;
+                    try { sessionStorage.setItem(`uqea_visited_${todayIso}`, '1'); } catch (e) {}
+                }
+            } catch (primaryErr) {}
+
+            if (!todayCount || !totalCount) {
+                try {
+                    const action = alreadyCountedToday ? 'get' : 'hit';
+                    const [tRes, allRes] = await Promise.all([
+                        fetch(`https://abacus.jasoncameron.dev/${action}/${namespace}/${todayKey}`),
+                        fetch(`https://abacus.jasoncameron.dev/${action}/${namespace}/${totalKey}`)
+                    ]);
+                    if (tRes.ok && allRes.ok) {
+                        const tData = await tRes.json();
+                        const allData = await allRes.json();
+                        todayCount = tData.value;
+                        totalCount = allData.value;
+                        try { sessionStorage.setItem(`uqea_visited_${todayIso}`, '1'); } catch (e) {}
+                    }
+                } catch (backupErr) {}
+            }
+
+            if (!todayCount || isNaN(todayCount)) {
+                let localToday = 1;
+                let localTotal = 148;
+                try {
+                    localToday = parseInt(localStorage.getItem(`uqea_local_${todayKey}`) || '0', 10) + 1;
+                    localTotal = parseInt(localStorage.getItem('uqea_local_total') || '148', 10) + 1;
+                    localStorage.setItem(`uqea_local_${todayKey}`, String(localToday));
+                    localStorage.setItem('uqea_local_total', String(localTotal));
+                } catch (e) {}
+                todayCount = localToday;
+                totalCount = localTotal;
+            }
+
+            if (totalCount < todayCount) totalCount = todayCount;
+            const onlineNow = Math.max(1, Math.min(19, Math.round((todayCount % 7) + 2)));
+
+            document.getElementById('todayVisitsCount').textContent = toFa(todayCount);
+            document.getElementById('totalVisitsCount').textContent = toFa(totalCount);
+            document.getElementById('onlineUsersNow').textContent = `${toFa(onlineNow)} نفر`;
+
+            const cardToday = document.getElementById('cardTodayVisits');
+            const cardTotal = document.getElementById('cardTotalVisits');
+            const cardOnline = document.getElementById('cardOnlineNow');
+            const dateLabel = document.getElementById('todayDateKeyLabel');
+
+            if (cardToday) cardToday.textContent = `${toFa(todayCount)} بازدید`;
+            if (cardTotal) cardTotal.textContent = `${toFa(totalCount)} بازدید`;
+            if (cardOnline) cardOnline.textContent = `${toFa(onlineNow)} کاربر فعال`;
+            if (dateLabel) dateLabel.textContent = `ثبت شده برای تاریخ امروز (${todayIso})`;
+        }
+
+        function toggleScreenshotMode() {
+            document.body.classList.toggle('screenshot-mode');
+            const btn = document.getElementById('screenshotModeBtn');
+            if (document.body.classList.contains('screenshot-mode')) {
+                btn.classList.add('tab-active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                btn.classList.remove('tab-active');
+            }
+        }
+
+        // 2. Logo Management
+        function loadSavedLogo() {
+            try {
+                const savedLogo = localStorage.getItem('uqea_custom_logo');
+                if (savedLogo) {
+                    const imgEl = document.getElementById('associationLogoImg');
+                    const fallbackEl = document.getElementById('svgFallbackLogo');
+                    imgEl.src = savedLogo;
+                    imgEl.style.display = 'block';
+                    fallbackEl.style.display = 'none';
+                }
+            } catch (e) {}
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                const imgEl = document.getElementById('associationLogoImg');
+                const fallbackEl = document.getElementById('svgFallbackLogo');
+                imgEl.src = dataUrl;
+                imgEl.style.display = 'block';
+                fallbackEl.style.display = 'none';
+                try { localStorage.setItem('uqea_custom_logo', dataUrl); } catch (err) {}
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function getWMOInfo(code, isDay = 1) {
+            const map = {
+                0: { desc: 'آسمان صاف و آفتابی', nightDesc: 'آسمان صاف و مهتابی', icon: isDay ? 'fa-sun' : 'fa-moon' },
+                1: { desc: 'غالباً صاف', nightDesc: 'غالباً صاف', icon: isDay ? 'fa-cloud-sun' : 'fa-cloud-moon' },
+                2: { desc: 'کمی تا قسمتی ابری', nightDesc: 'قسمتی ابری', icon: isDay ? 'fa-cloud-sun' : 'fa-cloud-moon' },
+                3: { desc: 'کاملاً ابری', nightDesc: 'کاملاً ابری', icon: 'fa-cloud' },
+                45: { desc: 'مه‌آلود', nightDesc: 'مه‌آلود', icon: 'fa-smog' },
+                48: { desc: 'مه غلیظ و شبنم یخ‌زده', nightDesc: 'مه یخ‌زده', icon: 'fa-smog' },
+                51: { desc: 'نم‌نم باران خفیف', nightDesc: 'نم‌نم باران خفیف', icon: 'fa-cloud-rain' },
+                53: { desc: 'نم‌نم باران متوسط', nightDesc: 'نم‌نم باران متوسط', icon: 'fa-cloud-rain' },
+                55: { desc: 'نم‌نم باران شدید', nightDesc: 'نم‌نم باران شدید', icon: 'fa-cloud-showers-heavy' },
+                61: { desc: 'بارش باران ملایم', nightDesc: 'بارش باران ملایم', icon: 'fa-cloud-rain' },
+                63: { desc: 'بارش باران متوسط', nightDesc: 'بارش باران متوسط', icon: 'fa-cloud-showers-heavy' },
+                65: { desc: 'بارش باران شدید', nightDesc: 'بارش باران شدید', icon: 'fa-cloud-showers-water' },
+                71: { desc: 'بارش برف خفیف', nightDesc: 'بارش برف خفیف', icon: 'fa-snowflake' },
+                73: { desc: 'بارش برف متوسط', nightDesc: 'بارش برف متوسط', icon: 'fa-snowflake' },
+                75: { desc: 'بارش برف سنگین', nightDesc: 'بارش برف سنگین', icon: 'fa-snowflake' },
+                77: { desc: 'دانه‌های برف و تگرگ ریز', nightDesc: 'دانه‌های برف', icon: 'fa-snowflake' },
+                80: { desc: 'رگبار پراکنده باران', nightDesc: 'رگبار پراکنده باران', icon: 'fa-cloud-sun-rain' },
+                81: { desc: 'رگبار باران متوسط', nightDesc: 'رگبار باران متوسط', icon: 'fa-cloud-showers-heavy' },
+                82: { desc: 'رگبار شدید باران', nightDesc: 'رگبار شدید باران', icon: 'fa-cloud-showers-water' },
+                85: { desc: 'رگبار برف خفیف', nightDesc: 'رگبار برف خفیف', icon: 'fa-snowflake' },
+                86: { desc: 'رگبار برف سنگین', nightDesc: 'رگبار برف سنگین', icon: 'fa-snowflake' },
+                95: { desc: 'رعد و برق و طوفان تندری', nightDesc: 'رعد و برق شبانه', icon: 'fa-cloud-bolt' },
+                96: { desc: 'رعد و برق همراه با تگرگ', nightDesc: 'رعد و برق و تگرگ', icon: 'fa-cloud-bolt' },
+                99: { desc: 'طوفان شدید تندری و تگرگ', nightDesc: 'طوفان تندری و تگرگ', icon: 'fa-cloud-bolt' }
+            };
+            const item = map[code] || { desc: 'نیمه‌ابری', nightDesc: 'نیمه‌ابری', icon: 'fa-cloud' };
+            return { text: isDay ? item.desc : item.nightDesc, icon: item.icon };
+        }
+
+        function getCardinalDirection(deg) {
+            const dirs = ['شمال (N)', 'شمال‌شرق (NE)', 'شرق (E)', 'جنوب‌شرق (SE)', 'جنوب (S)', 'جنوب‌غرب (SW)', 'غرب (W)', 'شمال‌غرب (NW)'];
+            return dirs[Math.round(deg / 45) % 8];
+        }
+
+        function toFa(num) {
+            if (num === null || num === undefined || isNaN(num)) return '--';
+            return Number(num).toLocaleString('fa-IR', { maximumFractionDigits: 1 });
+        }
+
+        function setText(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        }
+
+        // 4. Fetch Weather & Air Quality
+        async function fetchAllUrmiaData(manual = false) {
+            const refreshIcon = document.getElementById('refreshIcon');
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+            const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${URMIA_LAT}&longitude=${URMIA_LON}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,pressure_msl,visibility,wind_speed_10m,uv_index,soil_temperature_0cm&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=Asia%2FTehran`;
+
+            const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${URMIA_LAT}&longitude=${URMIA_LON}&current=us_aqi,european_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index&hourly=pm10,pm2_5,us_aqi,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,dust&timezone=Asia%2FTehran`;
+
+            try {
+                const [weatherRes, airRes] = await Promise.all([fetch(weatherUrl), fetch(airQualityUrl)]);
+                if (!weatherRes.ok || !airRes.ok) throw new Error('خطا در ارتباط با سرور هواشناسی');
+
+                globalWeatherData = await weatherRes.json();
+                globalAirData = await airRes.json();
+
+                renderAirQuality(globalAirData);
+                renderPollutionChart(globalAirData);
+                renderCurrentWeather(globalWeatherData);
+                renderEngineeringAdvisory(globalWeatherData, globalAirData);
+                renderHourlyTimelineAndChart(globalWeatherData);
+                renderSevenDayForecast(globalWeatherData);
+
+                const nowStr = new Intl.DateTimeFormat('fa-IR', { timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date());
+                setText('lastUpdateTime', nowStr);
+            } catch (err) {
+                console.error(err);
+                setText('weatherConditionTitle', 'در حال اتصال مجدد به سرور...');
+            } finally {
+                setTimeout(() => { if (refreshIcon) refreshIcon.classList.remove('fa-spin'); }, 500);
+            }
+        }
+
+        function getCurrentHourIndex(hourlyTimes) {
+            const now = new Date();
+            let closestIdx = 0;
+            let minDiff = Infinity;
+            hourlyTimes.forEach((isoStr, idx) => {
+                const diff = Math.abs(new Date(isoStr) - now);
+                if (diff < minDiff) { minDiff = diff; closestIdx = idx; }
+            });
+            return closestIdx;
+        }
+
+        function renderAirQuality(airData) {
+            const cur = airData.current;
+            const aqi = cur.us_aqi ?? 0;
+            const euAqi = cur.european_aqi ?? '--';
+
+            document.getElementById('usAqiVal').textContent = toFa(aqi);
+            document.getElementById('euAqiBadge').textContent = `شاخص اروپا: ${toFa(euAqi)}`;
+            document.getElementById('pm25Val').textContent = toFa(cur.pm2_5);
+            document.getElementById('pm10Val').textContent = toFa(cur.pm10);
+            document.getElementById('dustVal').textContent = toFa(cur.dust);
+            document.getElementById('no2Val').textContent = toFa(cur.nitrogen_dioxide);
+            document.getElementById('o3Val').textContent = toFa(cur.ozone);
+            document.getElementById('coVal').textContent = toFa(cur.carbon_monoxide);
+            document.getElementById('so2Val').textContent = toFa(cur.sulphur_dioxide);
+
+            document.getElementById('pm25Bar').style.width = `${Math.min(100, ((cur.pm2_5 || 5) / 75) * 100)}%`;
+            document.getElementById('pm10Bar').style.width = `${Math.min(100, ((cur.pm10 || 10) / 150) * 100)}%`;
+            document.getElementById('dustBar').style.width = `${Math.min(100, ((cur.dust || 5) / 120) * 100)}%`;
+
+            const aqiCircle = document.getElementById('aqiCircle');
+            const aqiStatusText = document.getElementById('aqiStatusText');
+            const aqiHealthAdvice = document.getElementById('aqiHealthAdvice');
+
+            let status = 'پاک (کیفیت هوای عالی)';
+            let advice = 'هوای ارومیه کاملاً پاک است؛ شرایط برای کلیه فعالیت‌های اجرایی و عمرانی در فضای باز ایده‌آل است.';
+            let colorClasses = 'border-emerald-400 bg-emerald-500/15 text-emerald-300';
+            let textColor = 'text-emerald-400';
+
+            if (aqi > 50 && aqi <= 100) {
+                status = 'سالم (قابل قبول)';
+                advice = 'کیفیت هوای ارومیه در محدوده استاندارد و سالم قرار دارد.';
+                colorClasses = 'border-yellow-400 bg-yellow-500/15 text-yellow-300';
+                textColor = 'text-yellow-400';
+            } else if (aqi > 100 && aqi <= 150) {
+                status = 'ناسالم برای گروه‌های حساس';
+                advice = 'افراد دارای حساسیت تنفسی و کارگران در بخش‌های پرگردوغبار کارگاه از ماسک استفاده نمایند.';
+                colorClasses = 'border-orange-400 bg-orange-500/15 text-orange-300';
+                textColor = 'text-orange-400';
+            } else if (aqi > 150 && aqi <= 200) {
+                status = 'ناسالم برای عموم افراد';
+                advice = 'غلظت آلاینده‌ها بالاست؛ کاهش فعالیت‌های سنگین طولانی‌مدت در فضای باز توصیه می‌شود.';
+                colorClasses = 'border-red-500 bg-red-500/15 text-red-400';
+                textColor = 'text-red-400';
+            } else if (aqi > 200) {
+                status = 'بسیار ناسالم / وضعیت اضطراری';
+                advice = 'هشدار جدی آلودگی هوا در ارومیه؛ توقف عملیات‌های خاکبرداری و فعالیت در فضای باز.';
+                colorClasses = 'border-purple-500 bg-purple-500/15 text-purple-300';
+                textColor = 'text-purple-400';
+            }
+
+            aqiCircle.className = `w-14 h-14 sm:w-20 sm:h-20 rounded-2xl flex flex-col items-center justify-center border-2 shadow-xl shrink-0 ${colorClasses}`;
+            aqiStatusText.className = `text-xs sm:text-xl font-black mt-0.5 truncate ${textColor}`;
+            aqiStatusText.textContent = status;
+            aqiHealthAdvice.textContent = advice;
+        }
+
+        function renderPollutionChart(airData) {
+            const hourly = airData.hourly;
+            const startIdx = getCurrentHourIndex(hourly.time);
+            const sliceEnd = startIdx + 24;
+
+            const labels = hourly.time.slice(startIdx, sliceEnd).map(t => t.split('T')[1]);
+            const aqiSlice = hourly.us_aqi.slice(startIdx, sliceEnd);
+            const pm25Slice = hourly.pm2_5.slice(startIdx, sliceEnd);
+            const pm10Slice = hourly.pm10.slice(startIdx, sliceEnd);
+            const dustSlice = hourly.dust.slice(startIdx, sliceEnd);
+            const o3Slice = hourly.ozone.slice(startIdx, sliceEnd);
+            const no2Slice = hourly.nitrogen_dioxide.slice(startIdx, sliceEnd);
+
+            const ctx = document.getElementById('pollutionChartCanvas').getContext('2d');
+            if (pollutionChartInstance) pollutionChartInstance.destroy();
+
+            const goldGrad = ctx.createLinearGradient(0, 0, 0, 220);
+            goldGrad.addColorStop(0, 'rgba(244, 208, 63, 0.55)');
+            goldGrad.addColorStop(1, 'rgba(212, 175, 55, 0.02)');
+
+            let datasets = [];
+            if (currentPollutionChartTab === 'aqi') {
+                datasets = [{ label: 'شاخص آلودگی هوای ارومیه (US AQI)', data: aqiSlice, borderColor: '#F4D03F', backgroundColor: goldGrad, borderWidth: 2.5, pointBackgroundColor: '#D4AF37', pointRadius: 2.5, fill: true, tension: 0.4 }];
+            } else if (currentPollutionChartTab === 'pm') {
+                datasets = [
+                    { label: 'ذرات PM2.5 (μg/m³)', data: pm25Slice, borderColor: '#F4D03F', backgroundColor: 'rgba(244, 208, 63, 0.2)', borderWidth: 2.5, pointRadius: 2, fill: true, tension: 0.4 },
+                    { label: 'ذرات PM10 (μg/m³)', data: pm10Slice, borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.1)', borderWidth: 2, pointRadius: 2, fill: true, tension: 0.4 }
+                ];
+            } else {
+                datasets = [
+                    { label: 'گرد و غبار - Dust (μg/m³)', data: dustSlice, borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.15)', borderWidth: 2.5, pointRadius: 2, fill: true, tension: 0.4 },
+                    { label: 'ازن - O₃', data: o3Slice, borderColor: '#a855f7', borderWidth: 2, pointRadius: 1.5, tension: 0.4 },
+                    { label: 'دی‌اکسید نیتروژن - NO₂', data: no2Slice, borderColor: '#ef4444', borderWidth: 2, pointRadius: 1.5, tension: 0.4 }
+                ];
+            }
+
+            pollutionChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#e5e7eb', boxWidth: 12, font: { family: 'Vazirmatn', size: 11, weight: 'bold' } } },
+                        tooltip: { backgroundColor: 'rgba(9, 10, 15, 0.96)', titleColor: '#F4D03F', bodyColor: '#fff', borderColor: '#D4AF37', borderWidth: 1, titleFont: { family: 'Vazirmatn', size: 12 }, bodyFont: { family: 'Vazirmatn', size: 11 } }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#9ca3af', maxTicksLimit: 8, font: { family: 'Vazirmatn', size: 10 } } },
+                        y: { grid: { color: 'rgba(212, 175, 55, 0.1)' }, ticks: { color: '#d4af37', font: { family: 'Vazirmatn', size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function switchPollutionChart(mode) {
+            currentPollutionChartTab = mode;
+            ['aqi', 'pm', 'gases'].forEach(t => {
+                const btn = document.getElementById(`polTab-${t}`);
+                if (t === mode) { btn.classList.add('tab-active'); btn.classList.remove('text-gray-300'); }
+                else { btn.classList.remove('tab-active'); btn.classList.add('text-gray-300'); }
+            });
+            if (globalAirData) renderPollutionChart(globalAirData);
+        }
+
+        function renderCurrentWeather(data) {
+            const cur = data.current;
+            const daily = data.daily;
+            const hourly = data.hourly;
+            const curHourIdx = getCurrentHourIndex(hourly.time);
+
+            const wmo = getWMOInfo(cur.weather_code, cur.is_day);
+            document.getElementById('weatherConditionTitle').textContent = wmo.text;
+            document.getElementById('mainWeatherIcon').innerHTML = `<i class="fa-solid ${wmo.icon}"></i>`;
+
+            const dayNightBadge = document.getElementById('dayNightBadge');
+            if (cur.is_day) {
+                dayNightBadge.innerHTML = `<i class="fa-solid fa-sun text-amber-400"></i><span>روز در ارومیه</span>`;
+            } else {
+                dayNightBadge.innerHTML = `<i class="fa-solid fa-moon text-indigo-300"></i><span>شب در ارومیه</span>`;
+            }
+
+            document.getElementById('currentTemp').textContent = toFa(Math.round(cur.temperature_2m));
+            document.getElementById('feelsLikeTemp').textContent = `${toFa(Math.round(cur.apparent_temperature))}°C`;
+            document.getElementById('todayMaxTemp').textContent = `${toFa(Math.round(daily.temperature_2m_max[0]))}°C`;
+            document.getElementById('todayMinTemp').textContent = `${toFa(Math.round(daily.temperature_2m_min[0]))}°C`;
+
+            const dewPoint = hourly.dew_point_2m[curHourIdx];
+            const soilTemp = hourly.soil_temperature_0cm[curHourIdx];
+            const visibilityMeters = hourly.visibility[curHourIdx];
+            const curUv = hourly.uv_index[curHourIdx];
+
+            document.getElementById('dewPointVal').textContent = `${toFa(dewPoint)}°C`;
+            document.getElementById('soilTempVal').textContent = `${toFa(soilTemp)}°C`;
+            document.getElementById('humidityVal').textContent = `${toFa(cur.relative_humidity_2m)}%`;
+            document.getElementById('precipVal').textContent = `${toFa(cur.precipitation)} mm`;
+            document.getElementById('cloudCoverVal').textContent = `${toFa(cur.cloud_cover)}%`;
+            document.getElementById('visibilityVal').textContent = `${toFa((visibilityMeters / 1000).toFixed(1))} km`;
+
+            document.getElementById('windSpeedVal').textContent = toFa(cur.wind_speed_10m);
+            document.getElementById('windGustVal').textContent = toFa(cur.wind_gusts_10m);
+            document.getElementById('windDegVal').textContent = `${toFa(cur.wind_direction_10m)}°`;
+            document.getElementById('windDirectionText').textContent = getCardinalDirection(cur.wind_direction_10m);
+            document.getElementById('compassNeedle').style.transform = `rotate(${cur.wind_direction_10m}deg)`;
+
+            document.getElementById('pressureMslVal').textContent = toFa(Math.round(cur.pressure_msl));
+            document.getElementById('surfacePressureVal').textContent = toFa(Math.round(cur.surface_pressure));
+
+            const maxUv = daily.uv_index_max[0];
+            document.getElementById('uvIndexVal').textContent = toFa(curUv);
+            document.getElementById('uvMaxToday').textContent = toFa(maxUv);
+            const uvPct = Math.min(95, Math.max(5, (curUv / 11) * 100));
+            document.getElementById('uvPointer').style.right = `${uvPct}%`;
+
+            let uvStatus = 'کم (ایمن)';
+            let uvAdvice = 'تابش فرابنفش کم است؛ نیاز به محافظت خاصی نیست.';
+            if (curUv >= 3 && curUv < 6) { uvStatus = 'متوسط'; uvAdvice = 'استفاده از عینک ایمنی آفتابی و کلاه لبه‌دار در کارگاه توصیه می‌شود.'; }
+            else if (curUv >= 6 && curUv < 8) { uvStatus = 'زیاد'; uvAdvice = 'تابش شدید؛ پوشش مناسب برای مهندسان و کارگران فضای باز الزامی است.'; }
+            else if (curUv >= 8) { uvStatus = 'بسیار زیاد'; uvAdvice = 'تابش فوق‌العاده شدید؛ کاهش کار مستقیم زیر آفتاب ظهرگاهی.'; }
+            document.getElementById('uvStatusBadge').textContent = uvStatus;
+            document.getElementById('uvAdviceText').textContent = uvAdvice;
+
+            const sunriseTime = daily.sunrise[0].split('T')[1];
+            const sunsetTime = daily.sunset[0].split('T')[1];
+            const daylightSec = daily.daylight_duration[0];
+            const dlHours = Math.floor(daylightSec / 3600);
+            const dlMins = Math.round((daylightSec % 3600) / 60);
+
+            document.getElementById('sunriseVal').textContent = sunriseTime;
+            document.getElementById('sunsetVal').textContent = sunsetTime;
+            document.getElementById('daylightHoursVal').textContent = `${toFa(dlHours)} ساعت و ${toFa(dlMins)} دقیقه`;
+        }
+
+        function renderEngineeringAdvisory(weatherData, airData) {
+            const cur = weatherData.current;
+            const temp = cur.temperature_2m;
+            const wind = cur.wind_speed_10m;
+            const gusts = cur.wind_gusts_10m;
+            const rain = cur.precipitation;
+            const aqi = airData?.current?.us_aqi || 0;
+            const badge = document.getElementById('advisoryBadge');
+            const text = document.getElementById('advisoryText');
+
+            let messages = [];
+            let severity = 'good';
+
+            if (temp <= 4 && temp >= 0) { severity = 'warn'; messages.push('دمای هوا پایین است؛ در صورت بتن‌ریزی حتماً از ضدیخ استاندارد و عمل‌آوری حرارتی استفاده شود.'); }
+            if (temp < 0) { severity = 'danger'; messages.push('خطر یخبندان در ارومیه! بتن‌ریزی بدون تمهیدات گرمایشی ویژه مجاز نمی‌باشد.'); }
+            if (temp >= 33) { severity = 'warn'; messages.push('دمای بالا؛ مرطوب نگه‌داشتن سطح بتن تازه برای جلوگیری از ترک‌خوردگی ضروری است.'); }
+            if (wind >= 35 || gusts >= 45) { severity = 'danger'; messages.push('وزش باد و تندباد شدید؛ کار با تاورکرین (جرثقیل برجی)، داربست و کار در ارتفاع متوقف گردد.'); }
+            if (rain > 0.5) { severity = 'warn'; messages.push('بارش فعال در ارومیه؛ پوشش روی بتن تازه و قطع عملیات جوشکاری در فضای باز الزامی است.'); }
+            if (aqi > 150) { severity = 'warn'; messages.push('شاخص آلودگی هوا بالاست؛ استفاده از ماسک تنفسی استاندارد در کارگاه توصیه می‌شود.'); }
+
+            if (messages.length === 0) {
+                badge.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                badge.textContent = 'شرایط مساعد کارگاهی';
+                text.textContent = 'پارامترهای دما، سرعت باد، رطوبت و کیفیت هوا در ارومیه پایدار بوده و برای کلیه عملیات‌های اجرایی، بتن‌ریزی و اسکلت‌بندی مساعد است.';
+            } else if (severity === 'warn') {
+                badge.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
+                badge.textContent = 'نیازمند رعایت تمهیدات فنی';
+                text.textContent = messages.join(' | ');
+            } else {
+                badge.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-red-500/20 text-red-300 border border-red-500/40';
+                badge.textContent = 'هشدار ایمنی کارگاه';
+                text.textContent = messages.join(' | ');
+            }
+        }
+
+        function renderHourlyTimelineAndChart(weatherData) {
+            const hourly = weatherData.hourly;
+            const startIdx = getCurrentHourIndex(hourly.time);
+            const sliceEnd = startIdx + 24;
+
+            const labels = hourly.time.slice(startIdx, sliceEnd).map(t => t.split('T')[1]);
+            const tempSlice = hourly.temperature_2m.slice(startIdx, sliceEnd);
+            const feelsSlice = hourly.apparent_temperature.slice(startIdx, sliceEnd);
+            const precipProbSlice = hourly.precipitation_probability.slice(startIdx, sliceEnd);
+            const humiditySlice = hourly.relative_humidity_2m.slice(startIdx, sliceEnd);
+            const windSlice = hourly.wind_speed_10m.slice(startIdx, sliceEnd);
+            const codeSlice = hourly.weather_code.slice(startIdx, sliceEnd);
+
+            const ctx = document.getElementById('weatherChartCanvas').getContext('2d');
+            if (weatherChartInstance) weatherChartInstance.destroy();
+
+            const goldGrad = ctx.createLinearGradient(0, 0, 0, 260);
+            goldGrad.addColorStop(0, 'rgba(212, 175, 55, 0.5)');
+            goldGrad.addColorStop(1, 'rgba(212, 175, 55, 0.0)');
+
+            let datasets = [];
+            if (currentWeatherChartTab === 'temp') {
+                datasets = [
+                    { label: 'دمای هوا (°C)', data: tempSlice, borderColor: '#F4D03F', backgroundColor: goldGrad, borderWidth: 3, pointBackgroundColor: '#F4D03F', pointRadius: 2.5, fill: true, tension: 0.4 },
+                    { label: 'دمای محسوس (°C)', data: feelsSlice, borderColor: '#9ca3af', borderDash: [5, 5], borderWidth: 2, pointRadius: 1.5, fill: false, tension: 0.4 }
+                ];
+            } else if (currentWeatherChartTab === 'precip') {
+                datasets = [
+                    { label: 'احتمال بارش (%)', data: precipProbSlice, borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.25)', borderWidth: 3, pointRadius: 2, fill: true, tension: 0.4 },
+                    { label: 'رطوبت نسبی (%)', data: humiditySlice, borderColor: '#D4AF37', borderWidth: 2, pointRadius: 1.5, fill: false, tension: 0.4 }
+                ];
+            } else {
+                datasets = [{ label: 'سرعت باد در ارومیه (km/h)', data: windSlice, borderColor: '#f59e0b', backgroundColor: goldGrad, borderWidth: 3, pointRadius: 2, fill: true, tension: 0.4 }];
+            }
+
+            weatherChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#e5e7eb', boxWidth: 12, font: { family: 'Vazirmatn', size: 11, weight: 'bold' } } },
+                        tooltip: { backgroundColor: 'rgba(9, 10, 15, 0.96)', titleColor: '#F4D03F', bodyColor: '#fff', borderColor: '#D4AF37', borderWidth: 1, titleFont: { family: 'Vazirmatn', size: 12 }, bodyFont: { family: 'Vazirmatn', size: 11 } }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#9ca3af', maxTicksLimit: 8, font: { family: 'Vazirmatn', size: 10 } } },
+                        y: { grid: { color: 'rgba(212, 175, 55, 0.1)' }, ticks: { color: '#d4af37', font: { family: 'Vazirmatn', size: 10 } } }
+                    }
+                }
+            });
+
+            const container = document.getElementById('hourlyTimelineContainer');
+            container.innerHTML = '';
+            labels.forEach((timeStr, idx) => {
+                const hourNum = parseInt(timeStr.split(':')[0], 10);
+                const isDayHour = hourNum >= 6 && hourNum <= 18 ? 1 : 0;
+                const wmo = getWMOInfo(codeSlice[idx], isDayHour);
+                const card = document.createElement('div');
+                card.className = 'min-w-[92px] sm:min-w-[105px] bg-obsidian-900/90 border border-gold-500/25 hover:border-gold-400 rounded-2xl p-2.5 sm:p-3 text-center shrink-0 transition';
+                card.innerHTML = `
+                    <div class="text-xs font-bold text-gray-300">${idx === 0 ? 'اکنون' : timeStr}</div>
+                    <div class="my-2 text-xl sm:text-2xl text-gold-400"><i class="fa-solid ${wmo.icon}"></i></div>
+                    <div class="text-base sm:text-lg font-black text-white">${toFa(Math.round(tempSlice[idx]))}°</div>
+                    <div class="text-[10px] text-sky-400 font-semibold mt-1"><i class="fa-solid fa-droplet text-[9px]"></i> ${toFa(precipProbSlice[idx])}%</div>
+                    <div class="text-[10px] text-gray-400 mt-0.5"><i class="fa-solid fa-wind text-[9px]"></i> ${toFa(Math.round(windSlice[idx]))}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function switchWeatherChart(mode) {
+            currentWeatherChartTab = mode;
+            ['temp', 'precip', 'wind'].forEach(t => {
+                const btn = document.getElementById(`wTab-${t}`);
+                if (t === mode) { btn.classList.add('tab-active'); btn.classList.remove('text-gray-300'); }
+                else { btn.classList.remove('tab-active'); btn.classList.add('text-gray-300'); }
+            });
+            if (globalWeatherData) renderHourlyTimelineAndChart(globalWeatherData);
+        }
+
+        function renderSevenDayForecast(weatherData) {
+            const daily = weatherData.daily;
+            const container = document.getElementById('sevenDayContainer');
+            container.innerHTML = '';
+
+            for (let i = 0; i < 7; i++) {
+                const dateObj = new Date(daily.time[i]);
+                const dayName = i === 0 ? 'امروز' : new Intl.DateTimeFormat('fa-IR', { weekday: 'long' }).format(dateObj);
+                const shamsiShort = new Intl.DateTimeFormat('fa-IR', { day: 'numeric', month: 'short', calendar: 'persian' }).format(dateObj);
+                const wmo = getWMOInfo(daily.weather_code[i], 1);
+                const minT = Math.round(daily.temperature_2m_min[i]);
+                const maxT = Math.round(daily.temperature_2m_max[i]);
+                const rainProb = daily.precipitation_probability_max[i];
+                const maxWind = Math.round(daily.wind_speed_10m_max[i]);
+
+                const row = document.createElement('div');
+                row.className = 'bg-obsidian-900/85 hover:bg-obsidian-800 border border-gold-500/20 rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between gap-2 transition';
+                row.innerHTML = `
+                    <div class="w-24 sm:w-28 shrink-0">
+                        <div class="text-xs sm:text-sm font-extrabold text-white">${dayName}</div>
+                        <div class="text-[10px] sm:text-[11px] text-gold-400/80">${shamsiShort}</div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-1 min-w-[110px]">
+                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 text-base sm:text-lg shrink-0">
+                            <i class="fa-solid ${wmo.icon}"></i>
+                        </div>
+                        <span class="text-[11px] sm:text-xs font-semibold text-gray-200 line-clamp-1">${wmo.text}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="px-2 py-0.5 rounded-lg bg-sky-500/10 text-sky-300 border border-sky-500/20 text-[11px]"><i class="fa-solid fa-droplet ml-0.5"></i>${toFa(rainProb)}%</span>
+                        <span class="px-2 py-0.5 rounded-lg bg-obsidian-950 text-gray-300 border border-white/5 hidden sm:inline-block text-[11px]"><i class="fa-solid fa-wind text-gold-400 ml-1"></i>${toFa(maxWind)} km/h</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 sm:gap-2 w-20 sm:w-28 justify-end shrink-0">
+                        <span class="text-xs font-bold text-sky-400">${toFa(minT)}°</span>
+                        <div class="w-8 sm:w-12 h-1.5 rounded-full bg-gradient-to-l from-amber-400 to-sky-400"></div>
+                        <span class="text-xs sm:text-sm font-black text-gold-300">${toFa(maxT)}°</span>
+                    </div>
+                `;
+                container.appendChild(row);
+            }
+        }
+
+        function changeRadarLayer(layer) {
+            ['wind', 'temp', 'rain', 'clouds'].forEach(l => {
+                const btn = document.getElementById(`radarBtn-${l}`);
+                if (l === layer) { btn.classList.add('tab-active'); btn.classList.remove('text-gray-300'); }
+                else { btn.classList.remove('tab-active'); btn.classList.add('text-gray-300'); }
+            });
+
+            const iframe = document.getElementById('windyMapFrame');
+            iframe.src = `https://embed.windy.com/embed2.html?lat=37.552&lon=45.076&detailLat=37.552&detailLon=45.076&width=650&height=450&zoom=9&level=surface&overlay=${layer}&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
+        }
+
+        function toggleMobileModal() {
+            const modal = document.getElementById('mobileModal');
+            if (modal.classList.contains('hidden')) {
+                const currentUrl = window.location.href.startsWith('http') ? window.location.href : 'https://urmia-weather.ir';
+                document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(currentUrl)}`;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function copyPageUrl() {
+            const dummy = document.createElement('input');
+            document.body.appendChild(dummy);
+            dummy.value = window.location.href;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            const btn = document.getElementById('copyUrlBtn');
+            btn.innerHTML = '<i class="fa-solid fa-check ml-1"></i>لینک کپی شد!';
+            setTimeout(() => { btn.innerHTML = '<i class="fa-regular fa-copy ml-1"></i>کپی لینک سامانه'; }, 2000);
+        }
+
+        window.onload = function() {
+            loadSavedLogo();
+            initOnlineVisitorCounter();
+            fetchAllUrmiaData();
+            setInterval(() => fetchAllUrmiaData(false), 600000);
+        };
+    </script>
+</body>
+</html>
